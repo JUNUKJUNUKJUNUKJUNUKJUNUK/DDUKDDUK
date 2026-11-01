@@ -1,0 +1,9 @@
+{
+    "name": "DDUKDDUK.PlayMode.Tests",
+    "references": [
+        "DDUKDDUK.Runtime"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
