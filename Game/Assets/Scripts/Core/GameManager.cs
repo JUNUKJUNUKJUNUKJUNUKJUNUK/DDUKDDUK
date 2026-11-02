@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+// 공통 상태를 보관하고 Manager 초기화와 JSON 변환·적용을 담당한다.
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -49,11 +50,13 @@ public class GameManager : MonoBehaviour
         Story = new StoryManager(saveData.story);
     }
 
+    // 기존 Manager 인스턴스를 유지한 채 불러온 데이터로 교체한다.
     public void LoadState(SaveData loadedData)
     {
         if (loadedData == null)
             throw new ArgumentNullException(nameof(loadedData));
 
+        // 검증 실패 시 기존 상태를 유지하도록 적용 전에 복구·검증한다.
         EnsureSaveData(loadedData);
         ValidateSaveData(loadedData);
 
@@ -68,6 +71,7 @@ public class GameManager : MonoBehaviour
         Phase.LoadData(saveData.phase);
     }
 
+    // 누락된 하위 데이터는 새 게임의 기본값으로 보완한다.
     private static void EnsureSaveData(SaveData data)
     {
         if (data.phase == null)
@@ -92,7 +96,6 @@ public class GameManager : MonoBehaviour
             data.story = new StoryData();
     }
 
-    // 모든 저장값을 확인한 뒤에만 현재 게임 상태를 교체할 수 있도록 비정상 데이터는 예외로 거부한다.
     private static void ValidateSaveData(SaveData data)
     {
         if (data.phase.day < 1)
@@ -117,7 +120,7 @@ public class GameManager : MonoBehaviour
             throw new ArgumentException("저장된 호감도는 0~100 범위여야 합니다.", nameof(data));
         }
 
-        // 누락된 재고 목록은 기존 ManagementManager.LoadData에서 빈 목록으로 복구한다.
+        // 누락된 목록은 ManagementManager.LoadData에서 빈 목록으로 복구한다.
         if (data.management.riceCakeStocks == null)
             return;
 
@@ -141,6 +144,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // JSON 문자열만 반환하며 파일 저장은 호출 측에서 처리한다.
     public string GetSaveJson()
     {
         return JsonUtility.ToJson(saveData, true);

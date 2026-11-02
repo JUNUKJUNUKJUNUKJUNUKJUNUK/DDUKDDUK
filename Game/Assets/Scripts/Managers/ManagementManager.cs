@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+// 평판과 종류별 떡의 생산량·남은 재고를 관리한다.
 public class ManagementManager
 {
     private ManagementData data;
@@ -18,8 +19,8 @@ public class ManagementManager
             data.riceCakeStocks = new List<RiceCakeStock>();
     }
 
-    // [평판]
 
+    // [평판]
     public int GetReputation()
     {
         return data.reputation;
@@ -33,8 +34,8 @@ public class ManagementManager
         data.reputation = checked(data.reputation + amount);
     }
 
-    // [떡 재고]
 
+    // [떡 재고]
     public int GetPreparedQuantity(RiceCakeType type)
     {
         ValidateType(type);
@@ -51,7 +52,7 @@ public class ManagementManager
         return stock?.remainingQuantity ?? 0;
     }
 
-    // 아침 생산 수량 확정 시 호출
+    // 생산량을 다시 확정하면 판매 후 남은 재고도 해당 수량으로 덮어쓴다.
     public void SetPreparedQuantity(RiceCakeType type, int quantity)
     {
         ValidateType(type);
@@ -71,7 +72,7 @@ public class ManagementManager
         stock.remainingQuantity = quantity;
     }
 
-    // 판매 성공 시 남은 재고 차감
+    // 판매는 남은 재고만 차감하며 자금 정산은 호출 측에서 처리한다.
     public bool TrySellRiceCake(RiceCakeType type, int quantity)
     {
         ValidateType(type);

@@ -1,5 +1,6 @@
 using System;
 
+// 스토리 진행 데이터의 보관과 교체를 담당한다.
 public class StoryManager
 {
     private StoryData data;

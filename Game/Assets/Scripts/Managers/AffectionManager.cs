@@ -1,5 +1,6 @@
 using System;
 
+// 캐릭터별 호감도를 관리하고 증감 결과를 0~100으로 제한한다.
 public class AffectionManager
 {
     private AffectionData data;
@@ -34,6 +35,7 @@ public class AffectionManager
 
     public void AddAffection(CharacterId id, int amount)
     {
+        // 극단적인 변화량도 오버플로 없이 계산한 뒤 범위를 제한한다.
         long sum = (long)GetAffection(id) + amount;
         int newAffection = (int)Math.Max(0L, Math.Min(100L, sum));
 

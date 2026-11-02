@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+// 유효한 연구 ID의 완료 여부를 관리하고 중복 기록을 방지한다.
 public class ResearchManager
 {
     private static readonly HashSet<string> ValidResearchIds =
@@ -36,11 +37,9 @@ public class ResearchManager
         return data.completedResearchIds.Contains(researchId);
     }
 
+    // 선행 조건·비용·행동 가능 여부는 호출 측에서 검증하며 여기서는 완료 기록만 처리한다.
     public void CompleteResearch(string researchId)
     {
-        // 이 함수를 호출하는 상위 연구 실행 함수에서
-        // ID 유효성, 선행 조건, 비용, 행동 가능 여부를 검증한다.
-        // 여기서는 데이터 보호를 위해 ID 유효성만 다시 확인한다.
         ValidateId(researchId);
 
         if (data.completedResearchIds.Contains(researchId))

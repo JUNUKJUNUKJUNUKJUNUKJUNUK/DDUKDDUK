@@ -1,5 +1,6 @@
 using System;
 
+// 마케팅의 주간 사용 제한과 적용일을 관리한다.
 public class MarketingManager
 {
     public const string ChaerinId = "MKT-CH";
@@ -15,6 +16,7 @@ public class MarketingManager
 
         LoadData(data);
 
+        // 데이터 교체 시 중복 구독되지 않도록 생성 시 한 번만 연결한다.
         phaseManager.OnDayChanged += HandleDayChanged;
     }
 
@@ -52,6 +54,7 @@ public class MarketingManager
                 "이번 주에 이미 사용한 마케팅입니다.");
         }
 
+        // 계산 실패 시 사용 상태를 유지하도록 적용일을 먼저 구한다.
         int applyDay = GetNextBusinessDay(phaseManager.GetDay());
 
         marketing.usedThisWeek = true;
@@ -84,6 +87,7 @@ public class MarketingManager
         }
     }
 
+    // 1·8·15일차에 사용 제한만 해제하고 최초 사용 이력과 적용일은 유지한다.
     private void HandleDayChanged(int day)
     {
         if (day % 7 != 1)
@@ -94,6 +98,7 @@ public class MarketingManager
         data.seogyeong.usedThisWeek = false;
     }
 
+    // 1일차를 월요일로 보고 토·일요일을 건너뛴다.
     private static int GetNextBusinessDay(int currentDay)
     {
         int weekday = (currentDay - 1) % 7;
