@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using DdukDduk.MainMenu;
 using NUnit.Framework;
@@ -62,7 +60,6 @@ public class MainMenuTests
         Assert.That(hits.Count, Is.GreaterThan(0));
         Assert.That(hits[0].gameObject.GetComponentInParent<UnityEngine.UI.Button>(), Is.SameAs(button));
         yield return null;
-        Capture("main-menu.png");
     }
 
     // 새로 하기는 선택 피드백만 표시하고 씬이나 GameManager를 변경하지 않는지 확인한다.
@@ -105,7 +102,6 @@ public class MainMenuTests
         Assert.That(Find<UnityEngine.UI.Button>("Slot3Button").interactable, Is.False);
         yield return null;
         yield return null;
-        Capture("continue-slots.png");
         GameManager previous = GameManager.Instance;
 
         Find<UnityEngine.UI.Button>("Slot2Button").onClick.Invoke();
@@ -150,7 +146,6 @@ public class MainMenuTests
         Assert.That(panel.GetComponentsInChildren<UnityEngine.UI.Toggle>().Length, Is.Zero);
         yield return null;
         yield return null;
-        Capture("settings-panel.png");
 
         Find<UnityEngine.UI.Button>("CloseSettingsButton").onClick.Invoke();
         Assert.That(panel.activeSelf, Is.False);
@@ -166,53 +161,5 @@ public class MainMenuTests
         var component = value.GetComponent<T>();
         Assert.That(component, Is.Not.Null, name);
         return component;
-    }
-
-    // 화면 출력이 생략되는 배치 환경에서도 실제 Canvas를 렌더 타깃에 그려 시각 검증 이미지를 만든다.
-    private void Capture(string filename)
-    {
-        string directory = Environment.GetEnvironmentVariable("DDUKDDUK_MENU_PREVIEW_DIR");
-        if (string.IsNullOrEmpty(directory)) return;
-        Directory.CreateDirectory(directory);
-        var canvas = Find<Canvas>("MainMenuCanvas");
-        var camera = Find<Camera>("Main Camera");
-        var target = RenderTexture.GetTemporary(1920, 1080, 24, RenderTextureFormat.ARGB32);
-        var previous = RenderTexture.active;
-        var previousTarget = camera.targetTexture;
-        var previousMode = canvas.renderMode;
-        var previousCamera = canvas.worldCamera;
-        float previousDistance = canvas.planeDistance;
-        Texture2D image = null;
-        try
-        {
-            camera.targetTexture = target;
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = camera;
-            canvas.planeDistance = 1f;
-            Canvas.ForceUpdateCanvases();
-            foreach (var text in canvas.GetComponentsInChildren<TMP_Text>())
-                text.ForceMeshUpdate();
-            if (UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null)
-                camera.Render();
-            else
-                UnityEngine.Rendering.RenderPipeline.SubmitRenderRequest(camera,
-                    new UnityEngine.Rendering.Universal.UniversalRenderPipeline.SingleCameraRequest { destination = target });
-            RenderTexture.active = target;
-            image = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);
-            image.ReadPixels(new Rect(0, 0, target.width, target.height), 0, 0);
-            image.Apply();
-            File.WriteAllBytes(Path.Combine(directory, filename), image.EncodeToPNG());
-        }
-        finally
-        {
-            RenderTexture.active = previous;
-            camera.targetTexture = previousTarget;
-            canvas.renderMode = previousMode;
-            canvas.worldCamera = previousCamera;
-            canvas.planeDistance = previousDistance;
-            Canvas.ForceUpdateCanvases();
-            RenderTexture.ReleaseTemporary(target);
-            if (image != null) UnityEngine.Object.Destroy(image);
-        }
     }
 }

@@ -4,8 +4,7 @@
     "DDUKDDUK.Runtime",
     "DDUKDDUK.MainMenu",
     "Unity.ugui",
-    "Unity.TextMeshPro",
-    "Unity.RenderPipelines.Universal.Runtime"
+    "Unity.TextMeshPro"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"
