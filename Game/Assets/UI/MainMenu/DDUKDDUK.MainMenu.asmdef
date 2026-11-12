@@ -1,0 +1,8 @@
+{
+    "name": "DDUKDDUK.MainMenu",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.ugui",
+        "DDUKDDUK.Runtime"
+    ]
+}

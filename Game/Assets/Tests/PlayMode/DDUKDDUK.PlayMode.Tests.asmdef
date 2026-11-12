@@ -1,0 +1,12 @@
+{
+  "name": "DDUKDDUK.PlayMode.Tests",
+  "references": [
+    "DDUKDDUK.Runtime",
+    "DDUKDDUK.MainMenu",
+    "Unity.ugui",
+    "Unity.TextMeshPro"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

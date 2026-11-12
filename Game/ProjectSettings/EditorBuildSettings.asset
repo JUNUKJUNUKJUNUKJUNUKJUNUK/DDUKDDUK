@@ -6,8 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 80f7558fc8c0afa41913f768f43c6c6b
+  - enabled: 1
     path: Assets/Shop/Scenes/RiceCakeShop.unity
     guid: 57cb731d721642941a573431c28ae9a0
+  - enabled: 1
+    path: Assets/Scenes/Prologue.unity
+    guid: 0e725c20dea1d084b95b0ce5f73d9ec3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -1,0 +1,12 @@
+{
+    "name": "DDUKDDUK.EditMode.Tests",
+    "references": [
+        "DDUKDDUK.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
