@@ -15,7 +15,6 @@ namespace DdukDduk.Shop
     [DisallowMultipleComponent]
     public sealed partial class ShopView : MonoBehaviour
     {
-        [SerializeField] private bool soundEnabled = true;
         private ShopModel model;
         private RectTransform canvasRect;
         private RectTransform stage;
@@ -156,6 +155,22 @@ namespace DdukDduk.Shop
             Canvas.ForceUpdateCanvases();
             FitStage();
             Refresh();
+        }
+
+        private void OnEnable()
+        {
+            if (Application.isPlaying) SettingsService.Changed += RefreshSoundButton;
+        }
+
+        private void OnDisable()
+        {
+            SettingsService.Changed -= RefreshSoundButton;
+        }
+
+        private void RefreshSoundButton()
+        {
+            if (soundButton != null)
+                soundButton.GetComponentInChildren<Text>().text = SettingsService.MasterVolume > 0 ? "소리\n켜짐" : "소리\n꺼짐";
         }
 
         private void OnDestroy()
@@ -551,7 +566,7 @@ namespace DdukDduk.Shop
             primaryCaption.text = arranging ? "배치 완료" : state.GetPhase() == GamePhase.ReadyToSell ? "판매 시작" : "판매 결과";
             primaryButton.GetComponent<Image>().color = arranging ? T.Red : T.Green;
             primaryButton.interactable = model != null;
-            soundButton.GetComponentInChildren<Text>().text = soundEnabled ? "소리\n켜짐" : "소리\n꺼짐";
+            soundButton.GetComponentInChildren<Text>().text = SettingsService.MasterVolume > 0 ? "소리\n켜짐" : "소리\n꺼짐";
 
             for (var index = 0; index < cards.Count; index++)
             {
@@ -875,44 +890,16 @@ namespace DdukDduk.Shop
 
         private void ToggleSound()
         {
-            soundEnabled = !soundEnabled;
-            AudioListener.pause = !soundEnabled;
+            SettingsService.ToggleMasterMute();
             Refresh();
         }
 
         private void ShowSettings()
         {
-            var panel = OpenDialog("Shop Settings", "가게 설정", 690, 405);
-            T.Label("Audio Label", panel, 40, 112, 300, 36, "소리", 25, T.Ink, TextAnchor.MiddleLeft, true);
-            T.Button("Toggle Sound", panel, 416, 108, 226, 48, soundEnabled ? "소리 끄기" : "소리 켜기", T.Hex("E7D2B1"), () => { ToggleSound(); ShowSettings(); }, 20);
-            T.Label("Volume Label", panel, 40, 177, 120, 35, "음량", 22, T.Ink);
-            var sliderRoot = T.At("Volume", panel, 183, 180, 459, 33);
-            var slider = sliderRoot.gameObject.AddComponent<Slider>();
-            slider.minValue = 0;
-            slider.maxValue = 1;
-            var track = T.Rect("Track", sliderRoot);
-            T.Fill(track, 0, 12, 0, 12);
-            T.Paint(track, T.Hex("D3BA92"), 4);
-            var fillArea = T.Rect("Fill Area", sliderRoot);
-            T.Fill(fillArea, 10, 12, 10, 12);
-            var fill = T.Rect("Fill", fillArea);
-            T.Fill(fill);
-            T.Paint(fill, T.Green, 4);
-            var handleArea = T.Rect("Handle Area", sliderRoot);
-            T.Fill(handleArea, 14, 0, 14, 0);
-            var handle = T.Rect("Handle", handleArea);
-            handle.sizeDelta = new Vector2(28, 28);
-            var handleImage = T.Paint(handle, T.Green, 14);
-            handleImage.sprite = T.Circle;
-            handleImage.raycastTarget = true;
-            slider.fillRect = fill;
-            slider.handleRect = handle;
-            slider.targetGraphic = handleImage;
-            slider.direction = Slider.Direction.LeftToRight;
-            slider.SetValueWithoutNotify(AudioListener.volume);
-            slider.onValueChanged.AddListener(value => AudioListener.volume = value);
-            T.Label("Audio value", panel, 40, 235, 600, 38, "소리 설정은 언제든 바꿀 수 있어요.", 20, T.MutedInk);
-            T.Button("Done", panel, 218, 307, 254, 56, "설정 완료", T.Green, CloseDialog, 22, T.LightPaper);
+            CloseDialog();
+            var prefab = Resources.Load<GameObject>("UI/SettingsPanel");
+            if (prefab == null) throw new InvalidOperationException("공통 설정 패널을 찾을 수 없습니다.");
+            Instantiate(prefab, modalLayer, false);
         }
 
         private void ShowSaleResult()

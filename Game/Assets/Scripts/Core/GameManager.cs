@@ -50,6 +50,12 @@ public class GameManager : MonoBehaviour
         Story = new StoryManager(saveData.story);
     }
 
+    // 저장 파일을 변경하지 않고 공통 상태를 새 게임 기본값으로 초기화한다.
+    public void StartNewGame()
+    {
+        LoadState(new SaveData());
+    }
+
     // 기존 Manager 인스턴스를 유지한 채 불러온 데이터로 교체한다.
     public void LoadState(SaveData loadedData)
     {

@@ -9,12 +9,13 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-// 시작 화면의 임시 동작과 슬롯 표시 조건을 검증하며 실제 게임 시작·저장·불러오기는 수행하지 않는다.
+// 새 게임의 초기화·프롤로그 진입과 시작 화면의 임시 슬롯 표시를 검증한다.
 public class MainMenuTests
 {
     private Scene scene;
     private Scene originalActiveScene;
     private MainMenuController menu;
+    private GameManager testManager;
 
     // 실제 생성된 시작 화면 씬을 추가로 열어 Inspector 연결과 런타임 동작을 함께 검증한다.
     [UnitySetUp]
@@ -35,8 +36,15 @@ public class MainMenuTests
     {
         if (originalActiveScene.IsValid() && originalActiveScene.isLoaded)
             SceneManager.SetActiveScene(originalActiveScene);
+        if (!originalActiveScene.IsValid() || !originalActiveScene.isLoaded)
+            SceneManager.SetActiveScene(SceneManager.CreateScene("MainMenuTestsCleanup"));
         if (scene.IsValid() && scene.isLoaded)
             yield return SceneManager.UnloadSceneAsync(scene);
+        var prologue = SceneManager.GetSceneByPath("Assets/Scenes/Prologue.unity");
+        if (prologue.IsValid() && prologue.isLoaded)
+            yield return SceneManager.UnloadSceneAsync(prologue);
+        if (testManager != null) Object.Destroy(testManager.gameObject);
+        yield return null;
     }
 
     // 기본 버튼 상태와 Canvas·EventSystem 연결, 새로 하기 버튼의 실제 레이캐스트 가능 여부를 확인한다.
@@ -62,17 +70,43 @@ public class MainMenuTests
         yield return null;
     }
 
-    // 새로 하기는 선택 피드백만 표시하고 씬이나 GameManager를 변경하지 않는지 확인한다.
-    [Test]
-    public void NewGameClick_OnlyShowsFeedback()
+    // Manager가 없는 시작 화면과 기존 진행이 있는 경우 모두 초기화 후 프롤로그로 이동한다.
+    [UnityTest]
+    public IEnumerator NewGameClick_InitializesStateAndOpensPrologue()
     {
-        GameManager previous = GameManager.Instance;
+        Assert.That(GameManager.Instance == null, Is.True);
         Find<UnityEngine.UI.Button>("NewGameButton").onClick.Invoke();
+        testManager = GameManager.Instance;
+        yield return null;
+        AssertPrologue();
 
-        Assert.That(Find<TMP_Text>("FeedbackText").text, Is.EqualTo("새로 하기를 선택했습니다."));
-        Assert.That(SceneManager.GetActiveScene(), Is.EqualTo(scene));
-        Assert.That(GameManager.Instance, Is.SameAs(previous));
-        Assert.That(Find<Transform>("SlotPanel").gameObject.activeSelf, Is.False);
+        testManager.Economy.AddMoney(12345);
+        testManager.Phase.AdvancePhase();
+        yield return SceneManager.LoadSceneAsync("Assets/Scenes/MainMenu.unity", LoadSceneMode.Single);
+        scene = SceneManager.GetActiveScene();
+        yield return null;
+        Find<UnityEngine.UI.Button>("NewGameButton").onClick.Invoke();
+        yield return null;
+        Assert.That(GameManager.Instance, Is.SameAs(testManager));
+        AssertPrologue();
+    }
+
+    private void AssertPrologue()
+    {
+        Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo("Assets/Scenes/Prologue.unity"));
+        var data = JsonUtility.FromJson<SaveData>(testManager.GetSaveJson());
+        Assert.That(data.phase.day, Is.EqualTo(1));
+        Assert.That(data.phase.phase, Is.EqualTo(GamePhase.Morning));
+        Assert.That(data.economy.money, Is.EqualTo(100000));
+        var label = Object.FindFirstObjectByType<TextMeshProUGUI>();
+        Assert.That(label.text, Is.EqualTo("대충 프롤로그 씬"));
+        Assert.That(label.alignment, Is.EqualTo(TextAlignmentOptions.Center));
+        Assert.That(label.rectTransform.anchorMin, Is.EqualTo(new Vector2(0.5f, 0.5f)));
+        Assert.That(label.rectTransform.anchorMax, Is.EqualTo(new Vector2(0.5f, 0.5f)));
+        Assert.That(label.rectTransform.anchoredPosition, Is.EqualTo(Vector2.zero));
+        label.ForceMeshUpdate();
+        Assert.That(label.isTextOverflowing, Is.False);
+        Assert.That(label.font.HasCharacters(label.text), Is.True);
     }
 
     // 저장 표시가 없는 경우 호출이 들어와도 슬롯 패널이 열리지 않는지 확인한다.
@@ -128,9 +162,9 @@ public class MainMenuTests
         Assert.That(Find<Transform>("SlotPanel").gameObject.activeSelf, Is.False);
     }
 
-    // 환경 설정은 제목과 돌아가기만 있는 빈 패널을 열고 닫으며 슬롯 패널과 동시에 열리지 않는지 확인한다.
+    // 공통 설정 패널의 세 음량과 화면 모드 항목을 열고 닫으며 슬롯 패널과 동시에 열리지 않는지 확인한다.
     [UnityTest]
-    public IEnumerator SettingsClick_OpensAndClosesEmptyPanel()
+    public IEnumerator SettingsClick_OpensAndClosesSharedPanel()
     {
         menu.Slots[0].hasSaveData = true;
         menu.RefreshSlots();
@@ -141,9 +175,9 @@ public class MainMenuTests
         var panel = Find<Transform>("SettingsPanel").gameObject;
         Assert.That(panel.activeSelf, Is.True);
         Assert.That(Find<Transform>("SlotPanel").gameObject.activeSelf, Is.False);
-        Assert.That(panel.GetComponentsInChildren<TMP_Text>().Length, Is.EqualTo(2));
-        Assert.That(panel.GetComponentsInChildren<UnityEngine.UI.Slider>().Length, Is.Zero);
-        Assert.That(panel.GetComponentsInChildren<UnityEngine.UI.Toggle>().Length, Is.Zero);
+        Assert.That(panel.GetComponent<SettingsPanelController>(), Is.Not.Null);
+        Assert.That(panel.GetComponentsInChildren<UnityEngine.UI.Slider>().Length, Is.EqualTo(3));
+        Assert.That(panel.GetComponentsInChildren<UnityEngine.UI.Toggle>().Length, Is.EqualTo(1));
         yield return null;
         yield return null;
 

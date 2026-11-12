@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace DdukDduk.MainMenu
 {
@@ -13,7 +14,7 @@ namespace DdukDduk.MainMenu
         public string summary = "임시 저장 기록";
     }
 
-    // 시작 화면의 표시와 선택 피드백만 담당하며 게임 진행이나 저장 파일을 변경하지 않는다.
+    // 시작 화면 표시와 새 게임 진입을 담당한다. 이어 하기는 임시 선택 피드백만 표시한다.
     public class MainMenuController : MonoBehaviour
     {
         [Header("임시 슬롯 — 저장 있음 여부를 Inspector에서 설정")]
@@ -56,10 +57,14 @@ namespace DdukDduk.MainMenu
                 slotPanel.SetActive(false);
         }
 
-        // 새 게임 생성이나 씬 이동 없이 선택했다는 피드백만 표시한다.
+        // 수동 저장 전까지 파일을 만들지 않고 새 공통 상태로 프롤로그에 진입한다.
         public void SelectNewGame()
         {
-            feedback.text = "새로 하기를 선택했습니다.";
+            var manager = GameManager.Instance;
+            if (manager == null)
+                manager = new GameObject("GameManager").AddComponent<GameManager>();
+            manager.StartNewGame();
+            SceneManager.LoadScene("Assets/Scenes/Prologue.unity");
         }
 
         // 저장 기록이 있는 경우에만 슬롯 선택 패널을 연다.
@@ -81,7 +86,7 @@ namespace DdukDduk.MainMenu
             feedback.text = "슬롯 " + (index + 1) + "번을 선택했습니다.";
         }
 
-        // 실제 설정 항목이 없는 빈 패널을 연다.
+        // 게임 진행과 독립적인 공통 환경 설정 패널을 연다.
         public void OpenSettings()
         {
             slotPanel.SetActive(false);

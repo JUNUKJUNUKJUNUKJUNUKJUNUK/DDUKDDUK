@@ -172,6 +172,8 @@ public static class MainMenuSceneBuilder
         settingsClose.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
         UnityEventTools.AddPersistentListener(settingsClose.onClick, controller.ClosePanels);
 
+        SettingsSceneBuilder.Populate(settingsPanel);
+
         var feedback = Text("FeedbackText", root, "", 32, Green, TextAlignmentOptions.Center);
         Position(feedback.rectTransform, new Vector2(0.5f, 0.055f), new Vector2(1100, 60));
         feedback.rectTransform.pivot = new Vector2(0.5f, 0.5f);

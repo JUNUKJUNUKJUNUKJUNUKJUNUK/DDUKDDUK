@@ -2,6 +2,7 @@
     "name": "DDUKDDUK.MainMenu",
     "references": [
         "Unity.TextMeshPro",
-        "Unity.ugui"
+        "Unity.ugui",
+        "DDUKDDUK.Runtime"
     ]
 }
