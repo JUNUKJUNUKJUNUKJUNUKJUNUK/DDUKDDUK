@@ -1,13 +1,13 @@
 # 테스트 안내
 
-공통 시스템과 시작 화면 테스트의 범위, 구성 및 실행 방법을 설명한다.
+공통 시스템, 시작 화면, 환경 설정 테스트의 범위, 구성 및 실행 방법을 설명한다.
 공통 시스템의 구조와 API 사용법은 [공통 시스템 설명서](../Scripts/README.md)를 참고한다.
 
 ## 1. 테스트 범위
 
 ### EditMode
 
-Manager의 데이터 처리와 규칙, 저장 파일의 읽기·쓰기를 검증한다.
+Manager의 데이터 처리와 규칙, 저장 파일의 읽기·쓰기, 환경 설정의 저장·복원을 검증한다.
 
 | 테스트 파일 | 주요 검증 내용 |
 |---|---|
@@ -19,6 +19,7 @@ Manager의 데이터 처리와 규칙, 저장 파일의 읽기·쓰기를 검증
 | [AffectionManagerTests.cs](EditMode/AffectionManagerTests.cs) | 캐릭터별 호감도 조회·증감, 0~100 범위 유지, 큰 증감 값 처리, 데이터 교체 |
 | [StoryManagerTests.cs](EditMode/StoryManagerTests.cs) | 스토리 데이터 보관·교체, 기존 진행 값 유지, null 거부 |
 | [SaveFileServiceTests.cs](EditMode/SaveFileServiceTests.cs) | 저장 시 폴더·슬롯 생성, 문자열 보존, 덮어쓰기와 슬롯 독립성, 잘못된 입력·없는 파일·쓰기 실패 처리, 임시 파일 정리 |
+| [SettingsTests.cs](EditMode/SettingsTests.cs) | 환경 설정 기본값, 잘못된 저장값 처리, 음량 범위 보정·데시벨 변환, 저장·복원 |
 
 ### PlayMode
 
@@ -29,7 +30,8 @@ GameObject와 씬, 프레임 진행이 필요한 동작 및 시스템 간 연결
 | [GameManagerTests.cs](PlayMode/GameManagerTests.cs) | 게임 상태의 JSON 변환·복원, 누락 데이터 보완, 비정상 저장 값 거부, 불러오기 실패 시 기존 상태 유지, Manager와 이벤트 구독 유지 |
 | [GameManagerLifecycleTests.cs](PlayMode/GameManagerLifecycleTests.cs) | 싱글턴 초기화와 중복 제거, 씬 전환 시 유지, 플레이 시간 누적, 비활성화·시간 정지 처리, 파괴 후 재생성 |
 | [SaveFileServiceIntegrationTests.cs](PlayMode/SaveFileServiceIntegrationTests.cs) | 실제 파일을 통한 게임 상태 저장·복원, 파일 부재·잘못된 JSON·비정상 저장 값으로 불러오기 실패 시 상태 유지 |
-| [MainMenuTests.cs](PlayMode/MainMenuTests.cs) | 시작 화면 버튼 연결, 새로 하기 피드백, 임시 저장 데이터에 따른 이어 하기 활성화와 슬롯 표시·선택, 환경 설정 패널 |
+| [MainMenuTests.cs](PlayMode/MainMenuTests.cs) | 시작 화면 버튼 연결, 새로 하기의 상태 초기화와 프롤로그 진입, 임시 저장 데이터에 따른 이어 하기 활성화와 슬롯 표시·선택, 환경 설정 패널 열기·닫기 |
+| [SettingsPanelTests.cs](PlayMode/SettingsPanelTests.cs) | 슬라이더·토글 동작, 믹서 음량 적용, 기본값 복원, 닫을 때 저장, 슬라이더 클릭 영역 |
 
 ## 2. 폴더 구성
 
@@ -47,13 +49,15 @@ Assets/Tests/
 │  ├─ ResearchManagerTests.cs
 │  ├─ AffectionManagerTests.cs
 │  ├─ StoryManagerTests.cs
-│  └─ SaveFileServiceTests.cs
+│  ├─ SaveFileServiceTests.cs
+│  └─ SettingsTests.cs
 └─ PlayMode/
    ├─ DDUKDDUK.PlayMode.Tests.asmdef
    ├─ GameManagerTests.cs
    ├─ GameManagerLifecycleTests.cs
    ├─ SaveFileServiceIntegrationTests.cs
-   └─ MainMenuTests.cs
+   ├─ MainMenuTests.cs
+   └─ SettingsPanelTests.cs
 ```
 
 EditMode는 에디터의 편집 상태에서 실행한다. PlayMode는 테스트 실행 중 플레이 모드로 진입하며, GameObject 생성과 씬 로드, 프레임 경과를 사용한다. 각 폴더의 `.asmdef`는 해당 테스트 코드의 어셈블리와 참조를 정의한다.
