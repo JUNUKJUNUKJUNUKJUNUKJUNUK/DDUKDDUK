@@ -41,10 +41,6 @@ public class PhaseManager
                 break;
 
             case GamePhase.Evening:
-                SetPhase(GamePhase.Night);
-                break;
-
-            case GamePhase.Night:
                 AdvanceNextDay();
                 break;
         }
@@ -59,7 +55,7 @@ public class PhaseManager
     private void AdvanceNextDay()
     {
         data.day++;
-        // 새 날짜를 먼저 알린다. 이 콜백 시점의 시간대는 아직 Night다.
+        // 새 날짜를 먼저 알린다. 이 콜백 시점의 시간대는 아직 Evening이다.
         OnDayChanged?.Invoke(data.day);
         SetPhase(GamePhase.Morning);
     }

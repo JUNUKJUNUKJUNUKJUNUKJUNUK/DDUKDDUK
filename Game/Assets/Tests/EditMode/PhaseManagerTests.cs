@@ -37,12 +37,11 @@ public class PhaseManagerTests
         Assert.That(manager.GetDay(), Is.EqualTo(day));
     }
 
-    // 밤 이외의 시간대에서는 정해진 다음 시간대로만 진행하고 날짜는 유지되는지 확인한다.
+    // 저녁 이전의 시간대에서는 정해진 다음 시간대로만 진행하고 날짜는 유지되는지 확인한다.
     [TestCase(GamePhase.Morning, GamePhase.Lunch)]
     [TestCase(GamePhase.Lunch, GamePhase.Closing)]
     [TestCase(GamePhase.Closing, GamePhase.Evening)]
-    [TestCase(GamePhase.Evening, GamePhase.Night)]
-    public void AdvancePhase_BeforeNight_AdvancesPhaseWithoutChangingDay(
+    public void AdvancePhase_BeforeEvening_AdvancesPhaseWithoutChangingDay(
         GamePhase currentPhase, GamePhase expectedPhase)
     {
         data.phase = currentPhase;
@@ -53,14 +52,14 @@ public class PhaseManagerTests
         Assert.That(manager.GetDay(), Is.EqualTo(1));
     }
 
-    // 일반 날짜와 주간 경계 모두에서 밤 다음은 날짜가 1 증가한 아침인지 확인한다.
+    // 일반 날짜와 주간 경계 모두에서 저녁 다음은 날짜가 1 증가한 아침인지 확인한다.
     [TestCase(1)]
     [TestCase(7)]
     [TestCase(14)]
-    public void AdvancePhase_FromNight_AdvancesToNextMorning(int day)
+    public void AdvancePhase_FromEvening_AdvancesToNextMorning(int day)
     {
         data.day = day;
-        data.phase = GamePhase.Night;
+        data.phase = GamePhase.Evening;
 
         manager.AdvancePhase();
 
@@ -69,14 +68,14 @@ public class PhaseManagerTests
         Assert.That(data.phase, Is.EqualTo(GamePhase.Morning));
     }
 
-    // 이벤트 구독자가 없어도 이틀 연속 시간대가 순환하고 밤에서만 날짜가 증가하는지 확인한다.
+    // 이벤트 구독자가 없어도 이틀 연속 시간대가 순환하고 저녁에서만 날짜가 증가하는지 확인한다.
     [Test]
     public void AdvancePhase_OverTwoDays_RepeatsEntireCycleWithoutSubscribers()
     {
         GamePhase[] expectedPhases =
         {
             GamePhase.Lunch, GamePhase.Closing, GamePhase.Evening,
-            GamePhase.Night, GamePhase.Morning
+            GamePhase.Morning
         };
 
         for (int cycle = 0; cycle < 2; cycle++)
@@ -92,12 +91,11 @@ public class PhaseManagerTests
         }
     }
 
-    // 모든 전환에서 시간대 이벤트는 정확히 한 번 발생하고, 밤에서만 날짜 이벤트도 한 번 발생하는지 확인한다.
+    // 모든 전환에서 시간대 이벤트는 정확히 한 번 발생하고, 저녁에서만 날짜 이벤트도 한 번 발생하는지 확인한다.
     [TestCase(GamePhase.Morning, GamePhase.Lunch, 1, 0)]
     [TestCase(GamePhase.Lunch, GamePhase.Closing, 1, 0)]
     [TestCase(GamePhase.Closing, GamePhase.Evening, 1, 0)]
-    [TestCase(GamePhase.Evening, GamePhase.Night, 1, 0)]
-    [TestCase(GamePhase.Night, GamePhase.Morning, 2, 1)]
+    [TestCase(GamePhase.Evening, GamePhase.Morning, 2, 1)]
     public void AdvancePhase_EmitsExpectedEventsWithUpdatedState(
         GamePhase currentPhase, GamePhase expectedPhase, int expectedDay, int expectedDayEventCount)
     {
@@ -124,18 +122,18 @@ public class PhaseManagerTests
         Assert.That(dayEvents.Count, Is.EqualTo(expectedDayEventCount));
     }
 
-    // 날짜 이벤트 시점에는 새 날짜와 기존 Night가 보이고, 이어지는 시간대 이벤트에서 Morning이 보이는지 확인한다.
+    // 날짜 이벤트 시점에는 새 날짜와 기존 Evening이 보이고, 이어지는 시간대 이벤트에서 Morning이 보이는지 확인한다.
     [Test]
-    public void AdvancePhase_FromNight_EmitsDayEventBeforeMorningEvent()
+    public void AdvancePhase_FromEvening_EmitsDayEventBeforeMorningEvent()
     {
-        data.phase = GamePhase.Night;
+        data.phase = GamePhase.Evening;
         List<string> eventOrder = new List<string>();
         manager.OnDayChanged += day =>
         {
             eventOrder.Add("day");
             Assert.That(day, Is.EqualTo(2));
             Assert.That(data.day, Is.EqualTo(2));
-            Assert.That(data.phase, Is.EqualTo(GamePhase.Night));
+            Assert.That(data.phase, Is.EqualTo(GamePhase.Evening));
         };
         manager.OnPhaseChanged += phase =>
         {
@@ -183,16 +181,10 @@ public class PhaseManagerTests
         manager.LoadData(loadedData);
         manager.AdvancePhase();
 
-        Assert.That(loadedData.phase, Is.EqualTo(GamePhase.Night));
-        Assert.That(manager.GetDay(), Is.EqualTo(8));
-        Assert.That(dayEvents, Is.Empty);
-
-        manager.AdvancePhase();
-
         Assert.That(loadedData.phase, Is.EqualTo(GamePhase.Morning));
         Assert.That(loadedData.day, Is.EqualTo(9));
         Assert.That(manager.GetDay(), Is.EqualTo(9));
-        Assert.That(phaseEvents, Is.EqualTo(new[] { GamePhase.Night, GamePhase.Morning }));
+        Assert.That(phaseEvents, Is.EqualTo(new[] { GamePhase.Morning }));
         Assert.That(dayEvents, Is.EqualTo(new[] { 9 }));
         Assert.That(data.day, Is.EqualTo(1));
         Assert.That(data.phase, Is.EqualTo(GamePhase.Morning));
@@ -210,7 +202,7 @@ public class PhaseManagerTests
     public void LoadData_WithNullData_ThrowsAndPreservesCurrentStateAndSubscriptions()
     {
         data.day = 7;
-        data.phase = GamePhase.Night;
+        data.phase = GamePhase.Evening;
         List<GamePhase> phaseEvents = new List<GamePhase>();
         List<int> dayEvents = new List<int>();
         manager.OnPhaseChanged += phase => phaseEvents.Add(phase);
@@ -219,7 +211,7 @@ public class PhaseManagerTests
         Assert.Throws<ArgumentNullException>(() => manager.LoadData(null));
 
         Assert.That(manager.GetDay(), Is.EqualTo(7));
-        Assert.That(data.phase, Is.EqualTo(GamePhase.Night));
+        Assert.That(data.phase, Is.EqualTo(GamePhase.Evening));
         Assert.That(phaseEvents, Is.Empty);
         Assert.That(dayEvents, Is.Empty);
 

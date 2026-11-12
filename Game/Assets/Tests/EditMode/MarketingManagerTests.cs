@@ -381,7 +381,7 @@ public class MarketingManagerTests
     // 실제 PhaseManager를 통해 아침부터 다음 날 아침까지 진행해 날짜 이벤트도 함께 발생시킨다.
     private void AdvanceOneDay()
     {
-        for (int step = 0; step < 5; step++)
+        for (int step = 0; step < 4; step++)
             phaseManager.AdvancePhase();
     }
 

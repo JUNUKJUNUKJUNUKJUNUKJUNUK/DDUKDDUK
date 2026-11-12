@@ -299,7 +299,7 @@ public class GameManagerTests
         Assert.That(latestData.marketing.chaerin.applyDay, Is.EqualTo(15));
         Assert.That(manager.Marketing.IsMarketingActive(MarketingManager.ChaerinId), Is.True);
         Assert.That(oldData.phase.day, Is.EqualTo(7));
-        Assert.That(oldData.phase.phase, Is.EqualTo(GamePhase.Night));
+        Assert.That(oldData.phase.phase, Is.EqualTo(GamePhase.Evening));
         Assert.That(oldData.marketing.chaerin.usedThisWeek, Is.True);
     }
 
@@ -360,7 +360,7 @@ public class GameManagerTests
             saveVersion = 1,
             savedAt = "2026-11-02T00:00:00+09:00",
             playTime = 123.5f,
-            phase = new PhaseData { day = 7, phase = GamePhase.Night },
+            phase = new PhaseData { day = 7, phase = GamePhase.Evening },
             economy = new EconomyData { money = 123456 },
             management = new ManagementData
             {

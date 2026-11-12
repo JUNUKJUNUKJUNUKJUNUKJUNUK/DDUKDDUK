@@ -182,13 +182,13 @@ LoadJson(json)
 | `LoadData(PhaseData)` | 이벤트 없이 데이터 참조 교체 |
 
 ```text
-Morning → Lunch → Closing → Evening → Night → 다음 날 Morning
+Morning → Lunch → Closing → Evening → 다음 날 Morning
 ```
 
-`Night`에서만 날짜가 1 증가한다. 다음 날 전환은 다음 순서다.
+`Evening`에서 진행하면 날짜가 1 증가하고 다음 날 아침으로 넘어간다. 다음 날 전환은 다음 순서다.
 
 1. 날짜 증가.
-2. `OnDayChanged` 발생. 이 시점의 시간대는 아직 `Night`.
+2. `OnDayChanged` 발생. 이 시점의 시간대는 아직 `Evening`.
 3. 시간대를 `Morning`으로 변경.
 4. `OnPhaseChanged` 발생.
 
