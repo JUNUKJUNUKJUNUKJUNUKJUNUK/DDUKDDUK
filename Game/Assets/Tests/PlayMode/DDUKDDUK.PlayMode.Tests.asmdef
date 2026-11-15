@@ -3,6 +3,7 @@
   "references": [
     "DDUKDDUK.Runtime",
     "DDUKDDUK.MainMenu",
+    "DDUKDDUK.Dialogue",
     "Unity.ugui",
     "Unity.TextMeshPro"
   ],

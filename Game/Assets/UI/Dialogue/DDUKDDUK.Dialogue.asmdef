@@ -1,0 +1,7 @@
+{
+    "name": "DDUKDDUK.Dialogue",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.ugui"
+    ]
+}
